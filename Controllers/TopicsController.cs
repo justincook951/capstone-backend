@@ -124,14 +124,14 @@ namespace CapstoneQuizAPI.Controllers
                 Id = Topic.Id,
                 TopicName = Topic.TopicName,
                 TopicDescription = Topic.TopicDescription,
-                OwnerId = Topic.OwnerId
+                UserId = Topic.UserId
             };
 
         private static Topic UpdatePutableFields(Topic Topic, TopicDTO TopicDTO)
         {
             Topic.TopicDescription = TopicDTO.TopicDescription;
             Topic.TopicName = TopicDTO.TopicName;
-            Topic.OwnerId = TopicDTO.OwnerId;
+            Topic.UserId = TopicDTO.UserId;
 
             return Topic;
         }
@@ -141,7 +141,7 @@ namespace CapstoneQuizAPI.Controllers
             {
                 TopicDescription = TopicDTO.TopicDescription,
                 TopicName = TopicDTO.TopicName,
-                OwnerId = TopicDTO.OwnerId
+                UserId = TopicDTO.UserId
             };
             
 

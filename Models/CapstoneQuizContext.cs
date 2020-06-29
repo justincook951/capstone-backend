@@ -14,5 +14,7 @@ namespace CapstoneQuizAPI.Models
         public DbSet<Question> Question { get; set; }
         public DbSet<ResultType> ResultType { get; set; }
         public DbSet<Topic> Topic { get; set; }
+        public DbSet<SessionQuestion> SessionQuestion { get; set; }
+        public DbSet<TestSession> TestSession { get; set; }
     }
 }

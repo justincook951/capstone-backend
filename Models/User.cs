@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace CapstoneQuizAPI.Models
 {
@@ -13,5 +14,8 @@ namespace CapstoneQuizAPI.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool IsAdmin { get; set; }
+
+        public virtual ICollection<Topic> Topics { get; set; }
+        public virtual ICollection<TestSession> TestSessions { get; set; }
     }
 }

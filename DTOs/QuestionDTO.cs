@@ -1,7 +1,5 @@
-﻿using System;
+﻿using CapstoneQuizAPI.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace CapstoneQuizAPI.DTOs
 {
@@ -11,5 +9,7 @@ namespace CapstoneQuizAPI.DTOs
         public string QuestionText { get; set; }
         public long TopicId { get; set; }
         public string QuestionExplanation { get; set; }
+        public Topic Topic { get; set; }
+        public ICollection<Answer> Answers { get; set; }
     }
 }
