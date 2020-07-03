@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CapstoneQuizAPI.Models;
 using CapstoneQuizAPI.DTOs;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using Microsoft.AspNetCore.Identity;
 
 namespace CapstoneQuizAPI.Controllers
 {
@@ -123,7 +126,7 @@ namespace CapstoneQuizAPI.Controllers
             {
                 Id = User.Id,
                 Username = User.Username,
-                PasswordHash = User.PasswordHash,
+                Password = "OBFUSCATED",
                 FirstName = User.FirstName,
                 LastName = User.LastName,
                 IsAdmin = User.IsAdmin,
@@ -131,7 +134,6 @@ namespace CapstoneQuizAPI.Controllers
 
         private static User UpdatePutableFields(User User, UserDTO UserDTO)
         {
-            User.PasswordHash = UserDTO.PasswordHash;
             User.Username = UserDTO.Username;
             User.FirstName = UserDTO.FirstName;
             User.LastName = UserDTO.LastName;
@@ -143,15 +145,23 @@ namespace CapstoneQuizAPI.Controllers
         {
             var User = new User
             {
-                PasswordHash = UserDTO.PasswordHash,
+                PasswordHash = UserDTO.Password,
                 Username = UserDTO.Username,
                 FirstName = UserDTO.FirstName,
                 LastName = UserDTO.LastName,
                 IsAdmin = UserDTO.IsAdmin,
             };
-            
+            // Despite the name, the password coming in from post is not actually hashed.
+            User.PasswordHash = HashPassword(User);
 
             return User;
+        }
+
+        private static string HashPassword(User user)
+        {
+            var passHasher = new PasswordHasher<User>();
+            user.PasswordHash = passHasher.HashPassword(user, user.PasswordHash);
+            return user.PasswordHash;
         }
     }
 }
