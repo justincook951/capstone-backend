@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace CapstoneQuizAPI.Controllers
 {
@@ -16,6 +17,7 @@ namespace CapstoneQuizAPI.Controllers
     {
         private readonly CapstoneQuizContext _context;
         private IConfiguration _iconfig;
+        private User _user;
 
         public TokenController(IConfiguration iconfig, CapstoneQuizContext context) { 
             _iconfig = iconfig;
@@ -24,16 +26,30 @@ namespace CapstoneQuizAPI.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public string PostUser(LoginDTO loginDto)
+        public ActionResult<IEnumerable<TokenDTO>> GetToken(LoginDTO loginDto)
         {
             var username = loginDto.username;
             var password = loginDto.password;
             if (CheckUser(username, password)) {
                 var jwtmgr = new JwtManager(_iconfig);
-                return jwtmgr.GenerateToken(username);
+                var tokenString = jwtmgr.GenerateToken(username, _user.IsAdmin);
+                var tokenDto = new TokenDTO
+                {
+                    Token = tokenString,
+                    IsAdmin = _user.IsAdmin
+                };
+                HttpContext.Response.Cookies.Append(
+                    "token", 
+                    tokenString,
+                    new Microsoft.AspNetCore.Http.CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = true
+                    });
+                return new List<TokenDTO>() { tokenDto };
             }
 
-            throw new UnauthorizedAccessException();
+            return Unauthorized();
         }
 
         public bool CheckUser(string username, string password)
@@ -43,8 +59,14 @@ namespace CapstoneQuizAPI.Controllers
                         where qUser.Username == username
                         select qUser;
             var user = query.FirstOrDefault<User>();
+            if (user == null) {
+                return false;
+            }
             var passHasher = new PasswordHasher<User>();
             var result = passHasher.VerifyHashedPassword(user, user.PasswordHash, password);
+            if (result == PasswordVerificationResult.Success) {
+                _user = user;
+            }
             return result == PasswordVerificationResult.Success;
         }
     }
