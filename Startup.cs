@@ -20,6 +20,16 @@ namespace CapstoneQuizAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                                  builder =>
+                                  {
+                                      builder.WithOrigins(Configuration.GetValue<string>("CapstoneOriginUrl"))
+                                        .AllowAnyHeader()
+                                        .AllowAnyMethod();
+                                  });
+            });
             services.AddDbContext<CapstoneQuizContext>(opt =>
                 opt.UseSqlServer(Configuration.GetConnectionString("QuizDB")));
             services.AddControllers();
@@ -33,6 +43,8 @@ namespace CapstoneQuizAPI
             }
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
