@@ -32,11 +32,12 @@ namespace CapstoneQuizAPI.Controllers
             var password = loginDto.password;
             if (CheckUser(username, password)) {
                 var jwtmgr = new JwtManager(_iconfig);
-                var tokenString = jwtmgr.GenerateToken(username, _user.IsAdmin);
+                var tokenString = jwtmgr.GenerateToken(_user, _user.IsAdmin);
                 var tokenDto = new TokenDTO
                 {
                     Token = tokenString,
-                    IsAdmin = _user.IsAdmin
+                    IsAdmin = _user.IsAdmin,
+                    User = UsersController.UserToDTO(_user)
                 };
                 HttpContext.Response.Cookies.Append(
                     "token", 
@@ -44,7 +45,8 @@ namespace CapstoneQuizAPI.Controllers
                     new Microsoft.AspNetCore.Http.CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true
+                        Secure = true,
+                        IsEssential = true
                     });
                 return new List<TokenDTO>() { tokenDto };
             }

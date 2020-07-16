@@ -10,6 +10,7 @@ using CapstoneQuizAPI.DTOs;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CapstoneQuizAPI.Controllers
 {
@@ -121,7 +122,7 @@ namespace CapstoneQuizAPI.Controllers
             return _context.User.Any(e => e.Id == id);
         }
 
-        private static UserDTO UserToDTO(User User) =>
+        public static UserDTO UserToDTO(User User) =>
             new UserDTO
             {
                 Id = User.Id,

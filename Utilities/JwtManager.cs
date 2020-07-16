@@ -11,10 +11,11 @@ namespace CapstoneQuizAPI.Utilities
     {
         private IConfiguration _config;
         public JwtManager(IConfiguration iconfig) { _config = iconfig; }
-        public string GenerateToken(string username, bool isAdmin, int expireMinutes = 20)
+        public string GenerateToken(Models.User user, bool isAdmin, int expireMinutes = 20)
         {
             var symmetricKey = Convert.FromBase64String(_config.GetValue<string>("SecretKey"));
             var tokenHandler = new JwtSecurityTokenHandler();
+            var username = user.Username;
 
             var now = DateTime.UtcNow;
             var claimArray = new List<Claim>();

@@ -1,4 +1,6 @@
-﻿namespace CapstoneQuizAPI.DTOs
+﻿using CapstoneQuizAPI.Models;
+
+namespace CapstoneQuizAPI.DTOs
 {
     /// <summary>
     /// Used to help describe token contents without requiring decoding by the consuming applications
@@ -7,5 +9,6 @@
     {
         public string Token { get; set; }
         public bool IsAdmin { get; set; }
+        public UserDTO User { get; set; }
     }
 }
