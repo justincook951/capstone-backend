@@ -40,10 +40,11 @@ namespace CapstoneQuizAPI.Controllers
                     User = UsersController.UserToDTO(_user)
                 };
                 HttpContext.Response.Cookies.Append(
-                    "token", 
+                    "auth_cookie", 
                     tokenString,
                     new Microsoft.AspNetCore.Http.CookieOptions
                     {
+                        Expires = DateTime.Now.AddMinutes(15),
                         HttpOnly = true,
                         Secure = true,
                         IsEssential = true

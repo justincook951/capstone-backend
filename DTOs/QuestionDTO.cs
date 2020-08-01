@@ -9,7 +9,7 @@ namespace CapstoneQuizAPI.DTOs
         public string QuestionText { get; set; }
         public long TopicId { get; set; }
         public string QuestionExplanation { get; set; }
-        public Topic Topic { get; set; }
+        public string TopicName { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }
 }

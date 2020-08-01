@@ -26,6 +26,7 @@ namespace CapstoneQuizAPI.Controllers
         public async Task<ActionResult<IEnumerable<TopicDTO>>> GetTopic()
         {
             return await _context.Topic
+                .Include(t => t.Questions)
                 .Select(Topic => TopicToDTO(Topic))
                 .ToListAsync();
         }
@@ -34,7 +35,9 @@ namespace CapstoneQuizAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TopicDTO>> GetTopic(long id)
         {
-            var Topic = await _context.Topic.FindAsync(id);
+            var Topic = await _context.Topic
+                .Include(t => t.Questions)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (Topic == null)
             {
@@ -124,14 +127,14 @@ namespace CapstoneQuizAPI.Controllers
                 Id = Topic.Id,
                 TopicName = Topic.TopicName,
                 TopicDescription = Topic.TopicDescription,
-                UserId = Topic.UserId
+                UserId = Topic.UserId,
+                Questions = Topic.Questions
             };
 
         private static Topic UpdatePutableFields(Topic Topic, TopicDTO TopicDTO)
         {
             Topic.TopicDescription = TopicDTO.TopicDescription;
             Topic.TopicName = TopicDTO.TopicName;
-            Topic.UserId = TopicDTO.UserId;
 
             return Topic;
         }

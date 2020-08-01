@@ -12,7 +12,7 @@ namespace CapstoneQuizAPI.Models
 
         public bool QuestionId { get; set; }
         public long ResultTypeId { get; set; }
-        public long SessionId { get; set; }
+        public long TestSessionId { get; set; }
         public TestSession TestSession { get; set; } 
         public virtual ICollection<Question> Questions { get; set; }
     }

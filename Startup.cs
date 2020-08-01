@@ -5,9 +5,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using CapstoneQuizAPI.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Threading.Tasks;
 
 namespace CapstoneQuizAPI
 {
@@ -28,7 +28,9 @@ namespace CapstoneQuizAPI
                 options.AddDefaultPolicy(
                                   builder =>
                                   {
-                                      builder.WithOrigins(Configuration.GetValue<string>("CapstoneOriginUrl"))
+                                      builder.WithOrigins
+                                        (Configuration.GetValue<string>("CapstoneOriginUrl"),
+                                        "localhost:8080")
                                         .AllowAnyHeader()
                                         .AllowAnyMethod();
                                   });
@@ -37,17 +39,20 @@ namespace CapstoneQuizAPI
                 opt.UseSqlServer(Configuration.GetConnectionString("QuizDB")));
             services.AddControllers();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
+            services.AddAuthentication(options => {
+                options.DefaultScheme = "Cookies";
+            }).AddCookie("Cookies", options => {
+                options.Cookie.Name = "auth_cookie";
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Events = new CookieAuthenticationEvents
                 {
-                    options.TokenValidationParameters = new TokenValidationParameters
+                    OnRedirectToLogin = redirectContext =>
                     {
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SecretKey"]))
-                    };
-                });
+                        redirectContext.HttpContext.Response.StatusCode = 401;
+                        return Task.CompletedTask;
+                    }
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -15,7 +15,6 @@ namespace CapstoneQuizAPI.Models
         /// </summary>
         public string QuestionExplanation { get; set; }
         public long TopicId { get; set; }
-        public Topic Topic { get; set; }
         public ICollection<Answer> Answers { get; set; }
     }
 }
