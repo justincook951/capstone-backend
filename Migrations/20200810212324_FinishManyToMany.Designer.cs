@@ -4,14 +4,16 @@ using CapstoneQuizAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CapstoneQuizAPI.Migrations
 {
     [DbContext(typeof(CapstoneQuizContext))]
-    partial class CapstoneQuizContextModelSnapshot : ModelSnapshot
+    [Migration("20200810212324_FinishManyToMany")]
+    partial class FinishManyToMany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,8 +94,8 @@ namespace CapstoneQuizAPI.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long>("QuestionId")
-                        .HasColumnType("bigint");
+                    b.Property<bool>("QuestionId")
+                        .HasColumnType("bit");
 
                     b.Property<long>("ResultTypeId")
                         .HasColumnType("bigint");

@@ -44,53 +44,13 @@ namespace CapstoneQuizAPI.Controllers
             return TestSessionToDTO(TestSession);
         }
 
-        // PUT: api/TestSessions/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTestSession(long id, TestSessionDTO TestSessionDTO)
-        {
-            if (id != TestSessionDTO.Id)
-            {
-                return BadRequest();
-            }
-
-            var TestSession = await _context.TestSession.FindAsync(id);
-            if (TestSession == null) {
-                return NotFound();
-            }
-
-            TestSession = UpdatePutableFields(TestSession, TestSessionDTO);
-
-            _context.Entry(TestSession).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TestSessionExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
         // POST: api/TestSessions
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
         public async Task<ActionResult<TestSessionDTO>> PostTestSession(TestSessionDTO TestSessionDTO)
         {
-            var TestSession = CreateFromDTO(TestSessionDTO);
-            _context.TestSession.Add(TestSession);
+            var TestSession = CreateNewSession(TestSessionDTO);
             await _context.SaveChangesAsync();
 
             //return CreatedAtAction("GetTestSession", new { id = TestSession.Id }, TestSession);
@@ -145,5 +105,93 @@ namespace CapstoneQuizAPI.Controllers
 
             return TestSession;
         }
+
+        private TestSession CreateNewSession(TestSessionDTO TestSessionDTO)
+        {
+            var EligibleQuestionsByTopic = GetEligibleQuestions(TestSessionDTO);
+            if (EligibleQuestionsByTopic.Count < 1) {
+                throw new Exception("The topic requested has no valid questions.");
+            }
+            TestSession session = new TestSession
+            {
+                LastVisitedTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                UserId = TestSessionDTO.UserId
+            };
+            _context.TestSession.Add(session);
+            _context.SaveChanges();
+            var TestSessionId = session.Id;
+            foreach (Question question in EligibleQuestionsByTopic) {
+                SessionQuestion sQuestion = new SessionQuestion
+                {
+                    QuestionId = question.Id,
+                    TestSessionId = TestSessionId,
+                    ResultTypeId = 1
+                };
+                _context.SessionQuestion.Add(sQuestion);
+                _context.SaveChanges();
+            }
+            return session;
+        }
+
+        private List<Question> GetEligibleQuestions(TestSessionDTO TestSessionDTO)
+        {
+            List<Question> questions = new List<Question>();
+            long UserId = TestSessionDTO.UserId;
+            long TopicId = TestSessionDTO.TopicId;
+            var QuestionsByTopic = 
+                _context.Question
+                    .Select(q => new
+                    {
+                        QuestionId = q.Id,
+                        QuestionExplanation = q.QuestionExplanation,
+                        QuestionText = q.QuestionText,
+                        TopicId = q.TopicId,
+                        Answers = q.Answers
+                            .Select(ans => new Answer{
+                                Id = ans.Id,
+                                AnswerText = ans.AnswerText,
+                                IsCorrect = ans.IsCorrect
+                            })
+                            .ToList()
+                    })
+                    .ToList();
+            foreach (var resultQuestion in QuestionsByTopic) {
+                Question newQuestion = new Question
+                {
+                    Id = resultQuestion.QuestionId,
+                    QuestionExplanation = resultQuestion.QuestionExplanation,
+                    QuestionText = resultQuestion.QuestionText,
+                    TopicId = resultQuestion.TopicId,
+                    Answers = resultQuestion.Answers
+                };
+                if (testQuestionValidity(newQuestion)) {
+                    questions.Add(newQuestion);
+                }
+            }
+            return questions;
+        }
+
+        private static bool testQuestionValidity(Question untestedQuestion)
+        {
+            // All questions must have 2 or more answers, one of them must be marked as correct, and have text and an explanation
+            bool isInvalid = true;
+            if (untestedQuestion.Answers.Count < 2 
+                || String.IsNullOrEmpty(untestedQuestion.QuestionExplanation)
+                || String.IsNullOrEmpty(untestedQuestion.QuestionText)) {
+                return isInvalid;
+            }
+            int correctCount = 0;
+            foreach (Answer answer in untestedQuestion.Answers) {
+                if (answer.IsCorrect) {
+                    correctCount++;
+                }
+            }
+            if (correctCount != 1) {
+                // Either 0 or more than 1 marked as correct
+                return isInvalid;
+            }
+            return true;
+        }
+
     }
 }
