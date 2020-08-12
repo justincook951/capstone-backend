@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace CapstoneQuizAPI.Models
 {
     /// <summary>
-    /// Represents a single question in the UI, of any type (given a QuestionTypeId)
+    /// Represents a single question in the UI
     /// </summary>
     public class Question
     {

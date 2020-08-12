@@ -12,7 +12,8 @@ namespace CapstoneQuizAPI.DTOs
         public long LastVisitedTime { get; set; }
         public long? SessionClosedTime { get; set; }
         public long UserId { get; set; }
-        public long TopicId { get; set; }
-        public virtual ICollection<SessionQuestionDTO> SessionQuestions { get; set; }
+        public long? TopicId { get; set; }
+        public Topic Topic { get; set; }
+        public virtual ICollection<SessionQuestion> SessionQuestions { get; set; }
     }
 }

@@ -26,6 +26,8 @@ namespace CapstoneQuizAPI.Controllers
         public async Task<ActionResult<IEnumerable<TestSessionDTO>>> GetTestSession()
         {
             return await _context.TestSession
+                .Include(ts => ts.SessionQuestions)
+                .Include(ts => ts.Topic)
                 .Select(TestSession => TestSessionToDTO(TestSession))
                 .ToListAsync();
         }
@@ -84,7 +86,10 @@ namespace CapstoneQuizAPI.Controllers
                 Id = TestSession.Id,
                 LastVisitedTime = TestSession.LastVisitedTime,
                 SessionClosedTime = TestSession.SessionClosedTime,
-                UserId = TestSession.UserId
+                UserId = TestSession.UserId,
+                SessionQuestions = TestSession.SessionQuestions,
+                TopicId = TestSession.TopicId,
+                Topic = TestSession.Topic
             };
 
         private static TestSession UpdatePutableFields(TestSession TestSession, TestSessionDTO TestSessionDTO)
@@ -115,7 +120,8 @@ namespace CapstoneQuizAPI.Controllers
             TestSession session = new TestSession
             {
                 LastVisitedTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                UserId = TestSessionDTO.UserId
+                UserId = TestSessionDTO.UserId,
+                TopicId = TestSessionDTO.TopicId
             };
             _context.TestSession.Add(session);
             _context.SaveChanges();
@@ -137,7 +143,7 @@ namespace CapstoneQuizAPI.Controllers
         {
             List<Question> questions = new List<Question>();
             long UserId = TestSessionDTO.UserId;
-            long TopicId = TestSessionDTO.TopicId;
+            long? TopicId = TestSessionDTO.TopicId;
             var QuestionsByTopic = 
                 _context.Question
                     .Select(q => new
