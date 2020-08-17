@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CapstoneQuizAPI.Models;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 
 namespace CapstoneQuizAPI.DTOs
@@ -11,8 +12,8 @@ namespace CapstoneQuizAPI.DTOs
         public long Id { get; set; }
         public long ResultTypeId { get; set; }
         public long TestSessionId { get; set; }
-        public TestSessionDTO TestSession { get; set; } 
-        public virtual ICollection<QuestionDTO> Questions { get; set; }
-        public ResultTypeDTO ResultType { get; set; }
+        public long QuestionId { get; set; }
+        public ResultType ResultType { get; set; }
+        public virtual Question Question { get; set; }
     }
 }

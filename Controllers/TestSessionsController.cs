@@ -21,15 +21,27 @@ namespace CapstoneQuizAPI.Controllers
             _context = context;
         }
 
-        // GET: api/TestSessions
+        // GET: api/TestSessions?includeClosed=false
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TestSessionDTO>>> GetTestSession()
+        public async Task<ActionResult<IEnumerable<TestSessionDTO>>> GetTestSession(string getFinished = "false")
         {
-            return await _context.TestSession
+            if (getFinished == "false") {
+                return await _context.TestSession
                 .Include(ts => ts.SessionQuestions)
                 .Include(ts => ts.Topic)
+                .Where(ts => !ts.SessionClosedTime.HasValue)
                 .Select(TestSession => TestSessionToDTO(TestSession))
                 .ToListAsync();
+            }
+            else {
+                return await _context.TestSession
+                .Include(ts => ts.SessionQuestions)
+                .Include(ts => ts.Topic)
+                .Where(ts => ts.SessionClosedTime.HasValue)
+                .Select(TestSession => TestSessionToDTO(TestSession))
+                .ToListAsync();
+            }
+            
         }
 
         // GET: api/TestSessions/5
@@ -180,11 +192,11 @@ namespace CapstoneQuizAPI.Controllers
         private static bool testQuestionValidity(Question untestedQuestion)
         {
             // All questions must have 2 or more answers, one of them must be marked as correct, and have text and an explanation
-            bool isInvalid = true;
+            bool isValid = false;
             if (untestedQuestion.Answers.Count < 2 
                 || String.IsNullOrEmpty(untestedQuestion.QuestionExplanation)
                 || String.IsNullOrEmpty(untestedQuestion.QuestionText)) {
-                return isInvalid;
+                return isValid;
             }
             int correctCount = 0;
             foreach (Answer answer in untestedQuestion.Answers) {
@@ -194,7 +206,7 @@ namespace CapstoneQuizAPI.Controllers
             }
             if (correctCount != 1) {
                 // Either 0 or more than 1 marked as correct
-                return isInvalid;
+                return isValid;
             }
             return true;
         }
