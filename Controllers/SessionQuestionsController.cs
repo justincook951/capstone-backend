@@ -50,6 +50,10 @@ namespace CapstoneQuizAPI.Controllers
                 }
             }
             int n = sqList.Count;
+            if (n == 0) {
+                await ensureClosedSession(sessionId, _context);
+                return sqList;
+            }
             Random rng = new Random();
             while (n > 1) {
                 n--;
@@ -176,6 +180,17 @@ namespace CapstoneQuizAPI.Controllers
                                             .Where(existingSq => existingSq.QuestionId == sq.QuestionId)
                                             .Count();
             return SessionQuestionsCount;
+        }
+
+        private async Task ensureClosedSession(long sessionId, DbContext context)
+        {
+            // For use when the session returns no valid results
+            var TestSession = await _context.TestSession.FindAsync(sessionId);
+            if (TestSession.SessionClosedTime == null) {
+                TestSession.SessionClosedTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                context.Entry(TestSession).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }
