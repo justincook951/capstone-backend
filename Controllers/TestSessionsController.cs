@@ -158,6 +158,7 @@ namespace CapstoneQuizAPI.Controllers
             long? TopicId = TestSessionDTO.TopicId;
             var QuestionsByTopic = 
                 _context.Question
+                    .Where(q => q.TopicId == TopicId)
                     .Select(q => new
                     {
                         QuestionId = q.Id,
